@@ -35,6 +35,7 @@ FireArray::FireArray()
 FireArray::~FireArray()
 {
     delete _fire_pixels;
+    delete _buffer;
 }
 
 void FireArray::spreadFire(int src)

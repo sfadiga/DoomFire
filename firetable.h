@@ -4,8 +4,9 @@
 #include <QImage>
 
 //!
-//! \brief The FireTable class - this class is uses a table index of RGP colors and a image buffer to generate the Doom fire effect.
-//!]
+//! \brief The FireTable class - this class is uses a table index of RGP colors and a
+//! image buffer to generate the Doom fire effect.
+//!
 class FireTable
 {
 public:
@@ -14,6 +15,10 @@ public:
 
 public:
     QPixmap update();
+
+private:
+    void doFire();
+    void spreadFire(int x, int y);
 
 private:
     //!
@@ -25,6 +30,7 @@ private:
     //! \brief _buffer - the image to be painted with coordinates of rgb colors from the table above
     //!
     QImage* _buffer;
+
 
 };
 

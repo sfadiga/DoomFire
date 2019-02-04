@@ -36,27 +36,48 @@ FireTable::~FireTable()
         delete _fire_pixels[i];
     }
     delete _fire_pixels;
+    delete _buffer;
 }
 
-
-QPixmap FireTable::update()
+void FireTable::doFire()
 {
     for(int x = 0 ; x < FIRE_WIDTH; x++)
     {
-        for (int y = (FIRE_HEIGHT - 2); y > 0; y--) // skip the first line (always white)
+        for (int y = (FIRE_HEIGHT - 1); y > 0; y--) // skip the first line (always white)
         {
-            //int rand_index = (qrand() * 3) & 3;
-            int rand_index = QRandomGenerator::global()->bounded(3);
-            int dst = x - rand_index + 1;
-            if(dst < 1)
-                dst = 1;
+            spreadFire(x, y);
+        }
+    }
+}
 
-            int index = _fire_pixels[FIRE_WIDTH - dst][y+1] - (rand_index & 1);
-            if(index < 0)
-                index = 0;
+void FireTable::spreadFire(int x, int y)
+{
+    // create the random index and use it to spread in x direction
+    int rnd_index = QRandomGenerator::global()->bounded(-2,5);
+    int nx = x - rnd_index;
+    if (nx < 0 || nx > FIRE_WIDTH - 1) // safe guards for the x position
+        nx = x;
 
-            _fire_pixels[x][y] = index;
-            _buffer->setPixel(x, y, static_cast<uint>(index));
+    int pixel = _fire_pixels[x][y]; // use the current value to propagate further
+    if(pixel == 0)
+    {
+        _fire_pixels[nx][y-1] = 0;
+    }
+    else
+    {   // uses the random index to randomly go to a cooler position in the palette
+        _fire_pixels[nx][y-1] = pixel - (rnd_index & 1);
+    }
+}
+
+QPixmap FireTable::update()
+{
+    doFire();
+    for(int h = FIRE_HEIGHT - 1 ; h > 0 ; h--) // changed the for here to match Qt coordinate system
+    {
+        for(int w = 0; w < FIRE_WIDTH; w++)
+        {
+            int i = _fire_pixels[w][h];
+            _buffer->setPixel(w, h, i);
         }
     }
     return QPixmap::fromImage(*_buffer);
