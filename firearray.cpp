@@ -1,7 +1,9 @@
 #include "firearray.h"
+#include "doomfire.h"
 
 #include <QPixmap>
-#include "doomfire.h"
+#include <QRandomGenerator>
+
 
 FireArray::FireArray()
 {
@@ -41,23 +43,24 @@ FireArray::~FireArray()
 void FireArray::spreadFire(int src)
 {
     int pixel = _fire_pixels[src];
-    if(pixel == 0) {
+    if(pixel == 0)
+    {
         _fire_pixels[src - FIRE_WIDTH] = 0;
     }
     else
     {
-        //int randIdx = Math.round(Math.random() * 3.0) & 3;
-        int randIdx = (qrand() * 3) & 3;
-        int dst = src - randIdx + 1;
-        _fire_pixels[dst - FIRE_WIDTH ] = pixel - (randIdx & 1);
+        //int rnd_index = (qrand() * 3) & 3; //using Qt modern random generator instead of qrand
+        int rnd_index = QRandomGenerator::global()->bounded(4);
+        int dst = src - rnd_index + 1;
+        _fire_pixels[dst - FIRE_WIDTH ] = pixel - (rnd_index & 1);
     }
 }
 
 void FireArray::doFire()
 {
-    for(int x=0 ; x < FIRE_WIDTH; x++)
+    for(int x = 0 ; x < FIRE_WIDTH ; x++)
     {
-        for (int y = 1; y < FIRE_HEIGHT; y++)
+        for (int y = 1 ; y < FIRE_HEIGHT ; y++)
         {
             spreadFire(y * FIRE_WIDTH + x);
         }
@@ -67,9 +70,9 @@ void FireArray::doFire()
 QPixmap FireArray::update()
 {
     doFire();
-    for(int h = FIRE_HEIGHT - 1 ; h > 0 ; h--) // changed the for here to match Qt coordinate system
+    for(int h = 0 ; h < FIRE_HEIGHT ; h++)
     {
-        for(int w = 0; w < FIRE_WIDTH; w++)
+        for(int w = 0 ; w < FIRE_WIDTH ; w++)
         {
             int i = _fire_pixels[h * FIRE_WIDTH + w];
             _buffer->setPixel(w, h, i);
